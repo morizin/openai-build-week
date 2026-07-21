@@ -1,0 +1,4 @@
+import { Plus } from "lucide-react";
+import { LmsShell } from "@/components/lms-shell";
+import { courses } from "@/lib/lms-data";
+export default function CoursesPage(){return <LmsShell active="Courses" eyebrow="LEARNING CATALOG" title="My courses" actions={<button className="lms-primary"><Plus size={17}/> Join course</button>}><div className="filter-row"><button className="selected">Active · 4</button><button>Completed · 8</button><button>All courses · 12</button></div><div className="course-card-grid">{courses.map(c=><article key={c.code}><div className={`course-band ${c.color}`}><span>{c.code}</span><strong>{c.progress}%</strong></div><div className="course-card-body"><small>{c.instructor}</small><h2>{c.title}</h2><p>Next: {c.next}</p><div className="card-progress"><i style={{width:`${c.progress}%`}}/></div><button>Open course <span>→</span></button></div></article>)}</div></LmsShell>}

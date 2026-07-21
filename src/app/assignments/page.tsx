@@ -1,0 +1,4 @@
+import { Filter } from "lucide-react";
+import { LmsShell } from "@/components/lms-shell";
+import { assignments } from "@/lib/lms-data";
+export default function AssignmentsPage(){return <LmsShell active="Assignments" eyebrow="COURSEWORK" title="Assignments" actions={<button className="lms-secondary"><Filter size={16}/> Filter</button>}><div className="filter-row"><button className="selected">Upcoming · 6</button><button>Submitted · 14</button><button>Graded · 11</button></div><section className="data-table"><div className="table-row table-head"><span>ASSIGNMENT</span><span>COURSE</span><span>DUE</span><span>STATUS</span><span>VALUE</span></div>{assignments.map(a=><div className="table-row" key={a.title}><strong>{a.title}</strong><span>{a.course}</span><span>{a.due}</span><span><i className={`status-dot ${a.status.toLowerCase().replaceAll(" ","-")}`}/>{a.status}</span><span>{a.points}</span></div>)}</section></LmsShell>}
