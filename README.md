@@ -50,3 +50,9 @@ API requests identify the demo actor with the `x-user-id` header.
 - `POST /api/enrollments`
 
 All write routes validate input and enforce workspace mode and server-side role permissions.
+
+## UI teammate handoff
+
+The stable UI integration contract, route map, API mapping, capability rules, workflow diagrams, and safe ownership boundaries are documented in [docs/UI_INTEGRATION_MAP.md](docs/UI_INTEGRATION_MAP.md).
+
+UI code should call the typed browser client in `src/features/lms/client.ts` and import DTOs from `src/features/lms/contracts.ts`. It should never import the repository, service, or server singleton directly.

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { capabilitiesFor } from "./capabilities";
 import { LmsError } from "./errors";
 import { MemoryLmsRepository } from "./repository";
 import type { Course, MembershipRole, OrgRole, WorkspaceMode } from "./types";
@@ -17,6 +18,10 @@ export class LmsService {
       workspaces: state.memberships.filter((membership) => membership.userId === userId).map((membership) => ({
         ...state.workspaces.find((workspace) => workspace.id === membership.workspaceId)!,
         role: membership.role,
+        capabilities: capabilitiesFor(
+          state.workspaces.find((workspace) => workspace.id === membership.workspaceId)!.mode,
+          membership.role,
+        ),
       })),
     };
   }
@@ -32,7 +37,7 @@ export class LmsService {
       draft.workspaces.push(workspace);
       draft.memberships.push({ id: `mem-${randomUUID()}`, workspaceId: workspace.id, userId: actorId, role, createdAt: workspace.createdAt });
     });
-    return { ...workspace, role };
+    return { ...workspace, role, capabilities: capabilitiesFor(input.mode, role) };
   }
 
   addOrganizationMember(actorId: string, workspaceId: string, userId: string, role: OrgRole) {
@@ -47,6 +52,14 @@ export class LmsService {
     const membership = { id: `mem-${randomUUID()}`, workspaceId, userId, role, createdAt: new Date().toISOString() };
     this.repository.update((draft) => draft.memberships.push(membership));
     return membership;
+  }
+
+  listMembers(actorId: string, workspaceId: string) {
+    const workspace = this.requireWorkspace(workspaceId);
+    if (workspace.mode === "organization") this.requireRole(actorId, workspaceId, ["teacher"]);
+    else this.requireRole(actorId, workspaceId, ["owner"]);
+    const state = this.repository.read();
+    return state.memberships.filter((membership) => membership.workspaceId === workspaceId);
   }
 
   listCourses(actorId: string, workspaceId: string): Course[] {
@@ -101,6 +114,16 @@ export class LmsService {
     const enrollment = { id: `enroll-${randomUUID()}`, ...input, enrolledBy: actorId, createdAt: new Date().toISOString() };
     this.repository.update((draft) => draft.enrollments.push(enrollment));
     return enrollment;
+  }
+
+  listEnrollments(actorId: string, workspaceId: string, courseId?: string) {
+    const membership = this.requireMembership(actorId, workspaceId);
+    const state = this.repository.read();
+    return state.enrollments.filter((enrollment) =>
+      enrollment.workspaceId === workspaceId &&
+      (!courseId || enrollment.courseId === courseId) &&
+      (membership.role === "teacher" || membership.role === "owner" || enrollment.studentId === actorId),
+    );
   }
 
   private requireUser(userId: string) {

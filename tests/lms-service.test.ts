@@ -12,6 +12,7 @@ describe("LMS tenancy and authorization", () => {
     const workspace = service.createWorkspace("user-sam", { name: "Acme Learning", mode: "organization" });
     assert.equal(workspace.mode, "organization");
     assert.equal(workspace.role, "teacher");
+    assert.ok(workspace.capabilities.includes("workspace:manage-members"));
   });
 
   it("creates a self-serve workspace with its individual as owner", () => {
@@ -19,6 +20,7 @@ describe("LMS tenancy and authorization", () => {
     const workspace = service.createWorkspace("user-maya", { name: "Maya Personal", mode: "self-serve" });
     assert.equal(workspace.mode, "self-serve");
     assert.equal(workspace.role, "owner");
+    assert.ok(workspace.capabilities.includes("enrollment:self"));
   });
 
   it("allows an organization teacher to create a draft course", () => {
@@ -51,6 +53,13 @@ describe("LMS tenancy and authorization", () => {
     const enrollment = service.enrollStudent("user-elena", { workspaceId: "ws-northstar", courseId: "course-data-101", studentId: "user-jordan" });
     assert.equal(enrollment.studentId, "user-jordan");
     assert.equal(enrollment.enrolledBy, "user-elena");
+  });
+
+  it("limits enrollment lists to a student's own records", () => {
+    const service = setup();
+    service.enrollStudent("user-elena", { workspaceId: "ws-northstar", courseId: "course-data-101", studentId: "user-jordan" });
+    assert.deepEqual(service.listEnrollments("user-maya", "ws-northstar").map((item) => item.studentId), ["user-maya"]);
+    assert.equal(service.listEnrollments("user-elena", "ws-northstar").length, 2);
   });
 
   it("blocks organization students from enrolling other students", () => {

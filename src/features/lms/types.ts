@@ -2,6 +2,15 @@ export type WorkspaceMode = "self-serve" | "organization";
 export type OrgRole = "teacher" | "student";
 export type MembershipRole = "owner" | OrgRole;
 export type CourseStatus = "draft" | "published" | "archived";
+export type LmsCapability =
+  | "workspace:view"
+  | "workspace:manage-members"
+  | "course:view"
+  | "course:create"
+  | "course:publish"
+  | "enrollment:view"
+  | "enrollment:manage"
+  | "enrollment:self";
 
 export interface User {
   id: string;
@@ -53,4 +62,9 @@ export interface LmsState {
   memberships: Membership[];
   courses: Course[];
   enrollments: Enrollment[];
+}
+
+export interface WorkspaceAccess extends Workspace {
+  role: MembershipRole;
+  capabilities: LmsCapability[];
 }
