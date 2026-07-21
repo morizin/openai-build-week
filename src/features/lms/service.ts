@@ -63,8 +63,18 @@ export class LmsService {
   }
 
   listCourses(actorId: string, workspaceId: string): Course[] {
-    this.requireMembership(actorId, workspaceId);
-    return this.repository.read().courses.filter((course) => course.workspaceId === workspaceId);
+    const membership = this.requireMembership(actorId, workspaceId);
+    const state = this.repository.read();
+    const workspaceCourses = state.courses.filter((course) => course.workspaceId === workspaceId);
+    if (membership.role === "student") {
+      const enrolledCourseIds = new Set(
+        state.enrollments
+          .filter((enrollment) => enrollment.workspaceId === workspaceId && enrollment.studentId === actorId)
+          .map((enrollment) => enrollment.courseId),
+      );
+      return workspaceCourses.filter((course) => enrolledCourseIds.has(course.id) && course.status === "published");
+    }
+    return workspaceCourses;
   }
 
   createCourse(actorId: string, input: { workspaceId: string; title: string; code: string; description: string }) {

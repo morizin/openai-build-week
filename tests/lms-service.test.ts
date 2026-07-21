@@ -70,6 +70,18 @@ describe("LMS tenancy and authorization", () => {
     );
   });
 
+  it("limits an organization student to their assigned published courses", () => {
+    const service = setup();
+    const draft = service.createCourse("user-elena", { workspaceId: "ws-northstar", title: "Unpublished Methods", code: "RES-101", description: "" });
+    const published = service.createCourse("user-elena", { workspaceId: "ws-northstar", title: "Applied Methods", code: "RES-102", description: "" });
+    service.publishCourse("user-elena", "ws-northstar", published.id);
+    service.enrollStudent("user-elena", { workspaceId: "ws-northstar", courseId: published.id, studentId: "user-jordan" });
+
+    assert.deepEqual(service.listCourses("user-maya", "ws-northstar").map((course) => course.id), ["course-data-101"]);
+    assert.deepEqual(service.listCourses("user-jordan", "ws-northstar").map((course) => course.id), [published.id]);
+    assert.ok(service.listCourses("user-elena", "ws-northstar").some((course) => course.id === draft.id));
+  });
+
   it("allows a self-serve owner to manage a personal course and enroll themselves", () => {
     const service = setup();
     const course = service.createCourse("user-sam", { workspaceId: "ws-sam", title: "Personal Study Plan", code: "SELF-1", description: "Independent study" });

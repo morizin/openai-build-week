@@ -1,4 +1,4 @@
-import type { Course, Enrollment, LmsCapability, Membership, OrgRole, User, WorkspaceAccess, WorkspaceMode } from "./types";
+import type { Course, CourseStatus, Enrollment, LmsCapability, Membership, OrgRole, User, WorkspaceAccess, WorkspaceMode } from "./types";
 
 export interface ApiErrorBody {
   error: "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "INTERNAL_ERROR";
@@ -34,4 +34,4 @@ export interface EnrollStudentInput {
   studentId: string;
 }
 
-export type { Course, Enrollment, LmsCapability, Membership, OrgRole, User, WorkspaceAccess, WorkspaceMode };
+export type { Course, CourseStatus, Enrollment, LmsCapability, Membership, OrgRole, User, WorkspaceAccess, WorkspaceMode };
